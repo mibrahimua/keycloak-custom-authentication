@@ -1,28 +1,30 @@
 package com.ulil;
 
 import org.keycloak.Config;
-import org.keycloak.authentication.authenticators.conditional.ConditionalAuthenticator;
-import org.keycloak.authentication.authenticators.conditional.ConditionalAuthenticatorFactory;
+import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class ConditionalIdentityAuthenticatorFactory  implements ConditionalAuthenticatorFactory {
-
+public class ExternalOtpAuthenticatorFactory implements AuthenticatorFactory {
     public static final String CONF_NOT = "not";
-    public static final String PROVIDER_ID = "conditional-identity-authenticator";
+    public static final String PROVIDER_ID = "custom-external-otp-auth";
 
-    @Override
-    public ConditionalAuthenticator getSingleton() {
-        return ConditionalIdentityAuthenticator.SINGLETON;
-    }
+    static final ExternalOtpAuthenticator SINGLETON = new ExternalOtpAuthenticator();
 
     @Override
     public String getDisplayType() {
-        return "Condition - SSO configured";
+        return "Custom - External OTP";
+    }
+
+    @Override
+    public String getReferenceCategory() {
+        return null;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class ConditionalIdentityAuthenticatorFactory  implements ConditionalAuth
 
     @Override
     public String getHelpText() {
-        return "Flow is executed only if the user has SSO configured";
+        return "Validate request body \"otp\" instead of password";
     }
 
     @Override
@@ -53,6 +55,11 @@ public class ConditionalIdentityAuthenticatorFactory  implements ConditionalAuth
         negateOutput.setLabel("Negate output");
         negateOutput.setHelpText("Apply a not to the check result");
         return Arrays.asList(negateOutput);
+    }
+
+    @Override
+    public Authenticator create(KeycloakSession keycloakSession) {
+        return SINGLETON;
     }
 
     @Override
